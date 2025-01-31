@@ -50,5 +50,4 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --capabilities CAPABILITY_IAM \
-            --region ${{ env.AWS_REGION }} \
-            --parameter-overrides BaseUrlParameter="${{ secrets.BASE_URL }}"
+            --region ${{ env.AWS_REGION }} 
