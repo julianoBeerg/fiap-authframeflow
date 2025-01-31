@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  fiap-authframeflow
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    LoggingConfig:
+      LogFormat: JSON
+
+Resources:
+  AuthLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: AuthFrameFlow
+      Handler: fiap.App::handleRequest
+      Runtime: java21
+      MemorySize: 512
+      Role: arn:aws:iam::992751745486:role/LabRole
+      Events:
+        UserApi:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: post
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: FrameFlowUserPool
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: AuthFrameUserPoolClient
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+      CallbackURLs:
+        - https://example.com/callback
+      LogoutURLs:
+        - https://example.com/logout
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  CognitoIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: BurgerIdentityPool
+      AllowUnauthenticatedIdentities: true
+      CognitoIdentityProviders:
+        - ClientId: !Ref CognitoUserPoolClient
+          ProviderName: !GetAtt CognitoUserPool.ProviderName
+
+  SecretCognitoIds:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: CognitoIds
+      SecretString: !Sub |
+        {
+          "UserPoolId": "${CognitoUserPool}",
+          "UserPoolClientId": "${CognitoUserPoolClient}"
+        }
+
+Outputs:
+  UserPoolId:
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: UserPoolId
+
+  UserPoolClientId:
+    Value: !Ref CognitoUserPoolClient
+    Export:
+      Name: UserPoolClientId
+
+  IdentityPoolId:
+    Value: !Ref CognitoIdentityPool
+    Export:
+      Name: IdentityPoolId
