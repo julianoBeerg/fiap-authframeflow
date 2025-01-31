@@ -46,7 +46,7 @@ jobs:
       - name: Deploy Authentication Customer Application
         run: |
           sam deploy \
-            --stack-name fiap-lambda51burguer \
+            --stack-name fiap-authframeflow \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --capabilities CAPABILITY_IAM \
