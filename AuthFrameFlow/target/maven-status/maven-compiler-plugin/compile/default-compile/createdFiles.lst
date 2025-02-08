@@ -1,0 +1,3 @@
+fiap\controller\AuthController.class
+fiap\App.class
+fiap\utils\exception\SecretNotFoundException.class

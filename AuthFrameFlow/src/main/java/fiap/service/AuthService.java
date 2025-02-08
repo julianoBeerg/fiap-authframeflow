@@ -8,10 +8,13 @@ import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fiap.model.User;
+import fiap.repository.UserRepository;
 import fiap.response.LoginResponse;
 import fiap.request.LoginRequest;
 import fiap.utils.JwtUtil;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
 
 public class AuthService {
@@ -20,6 +23,7 @@ public class AuthService {
     private final AWSSecretsManager secretsManager = AWSSecretsManagerClientBuilder.defaultClient();
     private final AWSCognitoIdentityProvider cognitoClient = AWSCognitoIdentityProviderClientBuilder.defaultClient();
     private final JwtUtil jwtUtil = new JwtUtil();
+    private final UserRepository userRepository = new UserRepository();
 
     public AuthService() {
         Map<String, String> secretValues = getSecretValues();
@@ -34,26 +38,48 @@ public class AuthService {
         String name = request.getName();
         String password = request.getPassword();
         String confirmationCode = request.getConfirmationCode();
+        String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
+
+        User existingUser = userRepository.findByEmail(email);
+        if (existingUser != null) {
+            String token = jwtUtil.generateToken(existingUser.getId(), existingUser.getUsername(), existingUser.getEmail());
+            return new LoginResponse(token);
+        }
+
         if (!userExists(email)) {
             if (name == null || name.isEmpty()) {
                 throw new IllegalArgumentException("Nome é obrigatório para cadastro.");
             }
             signUpUser(name, email, password);
+            userRepository.createUser(name, email, encodedPassword);
             return new LoginResponse("Cadastro realizado. Por favor, confirme seu e-mail.");
         }
 
         if (!isUserConfirmed(email)) {
             if (!confirmationCode.isEmpty()) {
                 confirmUser(email, confirmationCode);
-            }else{
-            sendConfirmationCode(email);
-            throw new RuntimeException("Usuário não confirmado. Um novo código de confirmação foi enviado.");
+            } else {
+                sendConfirmationCode(email);
+                throw new RuntimeException("Usuário não confirmado. Um novo código de confirmação foi enviado.");
             }
         }
 
+        if (userExists(email) && existingUser == null) {
+            if (name == null || name.isEmpty()) {
+                throw new IllegalArgumentException("Nome é obrigatório para cadastro.");
+            }
+
+            User newUser = userRepository.createUser(name, email, encodedPassword);
+
+            if (newUser == null) {
+                throw new RuntimeException("Erro ao criar usuário, a API retornou null.");
+            }
+            String token = jwtUtil.generateToken(newUser.getId(), newUser.getUsername(), newUser.getEmail());
+            return new LoginResponse(token);
+        }
+
         authenticate(email, password);
-        String token = jwtUtil.generateToken(email, name != null ? name : "Usuário");
-        return new LoginResponse(token);
+        throw new RuntimeException("Erro inesperado na autenticação.");
     }
 
     private void validateRequest(LoginRequest request) {
@@ -89,8 +115,6 @@ public class AuthService {
             return false;
         }
     }
-
-
 
     private void sendConfirmationCode(String email) {
         ResendConfirmationCodeRequest resendRequest = new ResendConfirmationCodeRequest()
@@ -162,4 +186,3 @@ public class AuthService {
         }
     }
 }
-
