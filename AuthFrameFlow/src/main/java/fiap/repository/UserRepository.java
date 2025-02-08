@@ -1,36 +1,49 @@
 package fiap.repository;
 
-import fiap.model.User;
+import fiap.model.UserModel;
+import org.springframework.http.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Base64;
 
 @Repository
 public class UserRepository {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl = System.getenv("BASE_URL");
 
-    public User findByEmail(String email) {
+    public UserModel findByEmail(String email) {
         try {
-            return restTemplate.getForObject(baseUrl + "email/" + email, User.class);
+            return restTemplate.getForObject(baseUrl+ "email/"+ email, UserModel.class);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public User createUser(String username, String email, String password) {
-        String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
+    public UserModel createUser(String username, String email, String password) {
 
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(encodedPassword);
+        String json = String.format(
+                "{\n" +
+                        "  \"username\": \"%s\",\n" +
+                        "  \"email\": \"%s\",\n" +
+                        "  \"password\": \"%s\",\n" +
+                        "  \"authorities\": [],\n" +
+                        "  \"enabled\": true,\n" +
+                        "  \"accountNonLocked\": true,\n" +
+                        "  \"credentialsNonExpired\": true,\n" +
+                        "  \"accountNonExpired\": true\n" +
+                        "}",
+                username, email, password
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(json, headers);
 
         try {
-            return restTemplate.postForObject(baseUrl, user, User.class);
+            return restTemplate.postForObject(baseUrl, requestEntity, UserModel.class);
         } catch (Exception e) {
             return null;
         }
     }
+
 }

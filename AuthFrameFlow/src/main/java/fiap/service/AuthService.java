@@ -8,11 +8,12 @@ import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fiap.model.User;
+import fiap.model.UserModel;
 import fiap.repository.UserRepository;
 import fiap.response.LoginResponse;
 import fiap.request.LoginRequest;
 import fiap.utils.JwtUtil;
+
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
@@ -35,14 +36,15 @@ public class AuthService {
         validateRequest(request);
 
         String email = request.getEmail();
-        String name = request.getName();
+        String name = email.split("@")[0];
+
         String password = request.getPassword();
         String confirmationCode = request.getConfirmationCode();
         String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
 
-        User existingUser = userRepository.findByEmail(email);
-        if (existingUser != null) {
-            String token = jwtUtil.generateToken(existingUser.getId(), existingUser.getUsername(), existingUser.getEmail());
+        UserModel existingUserModel = userRepository.findByEmail(email);
+        if (existingUserModel != null) {
+            String token = jwtUtil.generateToken(existingUserModel.getId(), existingUserModel.getEmail(), existingUserModel.getUsername());
             return new LoginResponse(token);
         }
 
@@ -64,17 +66,17 @@ public class AuthService {
             }
         }
 
-        if (userExists(email) && existingUser == null) {
+        if (userExists(email) && existingUserModel == null) {
             if (name == null || name.isEmpty()) {
                 throw new IllegalArgumentException("Nome é obrigatório para cadastro.");
             }
 
-            User newUser = userRepository.createUser(name, email, encodedPassword);
+            UserModel newUserModel = userRepository.createUser(name, email, encodedPassword);
 
-            if (newUser == null) {
+            if (newUserModel == null) {
                 throw new RuntimeException("Erro ao criar usuário, a API retornou null.");
             }
-            String token = jwtUtil.generateToken(newUser.getId(), newUser.getUsername(), newUser.getEmail());
+            String token = jwtUtil.generateToken(newUserModel.getId(), newUserModel.getEmail(), newUserModel.getUsername());
             return new LoginResponse(token);
         }
 
