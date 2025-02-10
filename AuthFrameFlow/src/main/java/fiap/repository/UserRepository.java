@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 @Repository
 public class UserRepository {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrl = System.getenv("BASE_URL");
+    private final String baseUrl = System.getenv("http://a6dea2562cc9e4765ba81669dd26c389-58602509.us-east-1.elb.amazonaws.com/api/v1/users/");
 
     public UserModel findByEmail(String email) {
         try {
