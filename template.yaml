@@ -17,7 +17,7 @@ Resources:
       Handler: fiap.App::handleRequest
       Runtime: java21
       MemorySize: 512
-      Role: arn:aws:iam::992751745486:role/LabRole
+      Role: arn:aws:iam::090111931170:role/LabRole
       Events:
         UserApi:
           Type: Api
