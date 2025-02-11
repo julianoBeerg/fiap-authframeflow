@@ -5,9 +5,13 @@ O FIAP Frameflow é um sistema projetado para processamento de vídeos, permitin
 
 ## 👨‍🔧👩‍🔧 Integrantes
 Carlos Jafet - RM 354076 - cjafet07@gmail.com
+
 Guilherme Macedo Moreira - RM 353750 - guilherme.macedomoreira@gmail.com
+
 Isabella Bellinazzi da Silva - RM 354143 - isabellinazzi@hotmail.com
+
 Juliano Silva Nunes - RM 354144 - silva.juliano8130@gmail.com
+
 Thiago Augusto Nery - RM 355063 - doomerbr@gmail.com
 
 ## 🔨 Arquitetura Proposta
@@ -42,6 +46,7 @@ A solução será baseada em uma arquitetura escalável e distribuída, garantin
 
 - [**Diagrama da Arquitetura do Sistema**](https://drive.google.com/file/d/1tmwsMudqYLGj0Bk0klof8fA4hw1KPFEX/view?usp=sharing)
 - [**Documentação da Modelagem de Dados**](https://docs.google.com/document/d/1saqkl32ulXfilE4y4Ay43t4JogHs1P7lekVda9JkCkM/edit?usp=sharing)
+- [**Organização no Sonar Cloud**](https://sonarcloud.io/projects)
 
 ## ✔️ Funcionalidades do Projeto
 
