@@ -33,8 +33,11 @@ A solução será baseada em uma arquitetura escalável e distribuída, garantin
 - **Infraestrutura de Banco de Dados Gerenciáveis com Terraform:**  
   [infra-bd-fiap-frameflow](https://github.com/GuiMM/infra-bd-fiap-frameflow)
 
+- **Microserviço de Notificação por E-mail (Consumidor):**  
+  [authframeflow](https://github.com/julianoBeerg/fiap-authframeflow)
+  
 - **Microserviço de Upload de Vídeo (Produtor):**  
-  [java-spring-aws-sqs](https://github.com/cjafet/java-spring-aws-sqs/blob/master/src/main/java/com/message/aws/model/entity/User.java)
+  [java-spring-aws-sqs](https://github.com/cjafet/java-spring-aws-sqs)
 
 - **Microserviço de Processamento de Vídeo (Consumidor):**  
   [fiap-frameflow](https://github.com/Tnery81/fiap-frameflow)
